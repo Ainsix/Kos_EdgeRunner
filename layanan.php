@@ -26,8 +26,10 @@ if ($aksi === 'tambah' || $aksi === 'ubah') {
 <form method="post">
   <input type="hidden" name="id" value="<?= $aksi === 'ubah' ? $h->e($_GET['id']) : '' ?>">
   <label>Nama Layanan</label>
+
   <input type="text" name="nama_layanan" maxlength="100" required value="<?= $h->e($d['nama_layanan']) ?>">
   <label>Tarif Layanan (Rp)</label>
+  
   <input type="number" step="0.01" min="0" name="tarif_layanan" required value="<?= $h->e($d['tarif_layanan']) ?>">
   <br><br>
   <button class="btn biru">Simpan</button>

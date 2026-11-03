@@ -24,7 +24,7 @@ if ($aksi === 'tambah' || $aksi === 'ubah') {
         ? $model->cari($_GET['id'])
         : ['nomor_kamar' => '', 'harga_bulanan' => '', 'status_kamar' => 'kosong', 'id_tipe' => '', 'id_pegawai' => ''];
     $tipe    = (new TipeKos())->semua();
-    $pegawai = (new Pegawai())->semua();
+    $pegawai = (new pegawai())->semua();
 ?>
 <h2><?= ucfirst($aksi) ?> Kamar Kos</h2>
 <form method="post">
