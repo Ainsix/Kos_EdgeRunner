@@ -1,62 +1,48 @@
 <?php
 require 'koneksi.php';
-$aksi = $_GET['aksi'] ?? 'list';
+
+$h     = new Halaman();
+$model = new Layanan();
+$aksi  = $_GET['aksi'] ?? 'list';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = $_POST['id_layanan'] ?? '';
-    $v  = [$_POST['nama_layanan'], $_POST['tarif_layanan']];
-    if ($id === '') {
-        $pdo->prepare("INSERT INTO layanan (nama_layanan, tarif_layanan) VALUES (?,?)")->execute($v);
-    } else {
-        $v[] = $id;
-        $pdo->prepare("UPDATE layanan SET nama_layanan=?, tarif_layanan=? WHERE id_layanan=?")->execute($v);
-    }
-    header('Location: layanan.php?tipe=ok&pesan=' . urlencode('Data berhasil disimpan')); exit;
+    $model->simpan($_POST, $_POST['id'] ?? '');
+    $h->redirect('layanan.php', 'Data berhasil disimpan');
 }
 
 if ($aksi === 'hapus') {
-    try {
-        $pdo->prepare("DELETE FROM layanan WHERE id_layanan=?")->execute([$_GET['id']]);
-        $p = 'tipe=ok&pesan=' . urlencode('Data dihapus');
-    } catch (PDOException $e) {
-        $p = 'pesan=' . urlencode('Tidak bisa dihapus, layanan masih dipakai data sewa');
+    if ($model->hapus($_GET['id'])) {
+        $h->redirect('layanan.php', 'Data dihapus');
     }
-    header("Location: layanan.php?$p"); exit;
+    $h->redirect('layanan.php', 'Tidak bisa dihapus, layanan masih dipakai data sewa', false);
 }
 
-include 'layout_atas.php';
+$h->atas();
 
 if ($aksi === 'tambah' || $aksi === 'ubah') {
-    $d = ['id_layanan' => '', 'nama_layanan' => '', 'tarif_layanan' => ''];
-    if ($aksi === 'ubah') {
-        $st = $pdo->prepare("SELECT * FROM layanan WHERE id_layanan=?");
-        $st->execute([$_GET['id']]);
-        $d = $st->fetch();
-    }
+    $d = ($aksi === 'ubah') ? $model->cari($_GET['id']) : ['nama_layanan' => '', 'tarif_layanan' => ''];
 ?>
 <h2><?= ucfirst($aksi) ?> Layanan</h2>
 <form method="post">
-  <input type="hidden" name="id_layanan" value="<?= e($d['id_layanan']) ?>">
+  <input type="hidden" name="id" value="<?= $aksi === 'ubah' ? $h->e($_GET['id']) : '' ?>">
   <label>Nama Layanan</label>
-  <input type="text" name="nama_layanan" maxlength="100" required value="<?= e($d['nama_layanan']) ?>">
+  <input type="text" name="nama_layanan" maxlength="100" required value="<?= $h->e($d['nama_layanan']) ?>">
   <label>Tarif Layanan (Rp)</label>
-  <input type="number" step="0.01" min="0" name="tarif_layanan" required value="<?= e($d['tarif_layanan']) ?>">
+  <input type="number" step="0.01" min="0" name="tarif_layanan" required value="<?= $h->e($d['tarif_layanan']) ?>">
   <br><br>
   <button class="btn biru">Simpan</button>
   <a class="btn abu" href="layanan.php">Batal</a>
 </form>
-<?php } else {
-    $data = $pdo->query("SELECT * FROM layanan ORDER BY id_layanan DESC")->fetchAll();
-?>
+<?php } else { ?>
 <h2>Data Layanan</h2>
 <a class="btn biru" href="?aksi=tambah">+ Tambah</a>
 <table>
   <tr><th>No</th><th>Nama Layanan</th><th>Tarif</th><th>Aksi</th></tr>
-  <?php foreach ($data as $i => $r): ?>
+  <?php foreach ($model->semua() as $i => $r): ?>
   <tr>
     <td><?= $i + 1 ?></td>
-    <td><?= e($r['nama_layanan']) ?></td>
-    <td><?= rupiah($r['tarif_layanan']) ?></td>
+    <td><?= $h->e($r['nama_layanan']) ?></td>
+    <td><?= $h->rupiah($r['tarif_layanan']) ?></td>
     <td>
       <a class="btn kuning" href="?aksi=ubah&id=<?= $r['id_layanan'] ?>">Ubah</a>
       <a class="btn merah" href="?aksi=hapus&id=<?= $r['id_layanan'] ?>" onclick="return confirm('Hapus data ini?')">Hapus</a>
@@ -65,4 +51,4 @@ if ($aksi === 'tambah' || $aksi === 'ubah') {
   <?php endforeach; ?>
 </table>
 <?php }
-include 'layout_bawah.php';
+$h->bawah();
