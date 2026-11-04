@@ -29,9 +29,10 @@ if ($aksi === 'tambah' || $aksi === 'ubah') {
 
   <input type="text" name="nama_layanan" maxlength="100" required value="<?= $h->e($d['nama_layanan']) ?>">
   <label>Tarif Layanan (Rp)</label>
-  
+
   <input type="number" step="0.01" min="0" name="tarif_layanan" required value="<?= $h->e($d['tarif_layanan']) ?>">
   <br><br>
+  
   <button class="btn biru">Simpan</button>
   <a class="btn abu" href="layanan.php">Batal</a>
 </form>

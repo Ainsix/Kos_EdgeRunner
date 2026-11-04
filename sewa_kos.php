@@ -31,19 +31,25 @@ if ($aksi === 'tambah' || $aksi === 'ubah') {
 <form method="post">
 
   <input type="hidden" name="id" value="<?= $aksi === 'ubah' ? $h->e($_GET['id']) : '' ?>">
+
   <label>Nama Penyewa</label>
-
   <input type="text" name="nama_penyewa" maxlength="100" required value="<?= $h->e($d['nama_penyewa']) ?>">
-  <label>No. Telepon Penyewa</label>
 
-  <input type="text" name="no_telp_penyewa" maxlength="15" required value="<?= $h->e($d['no_telp_penyewa']) ?>">
+  <label>No. Telepon Penyewa</label>
+  <input type="number" name="no_telp_penyewa" maxlength="15" required value="<?= $h->e($d['no_telp_penyewa']) ?>">
+
   <label>Kamar</label>
   <select name="id_kos" required>
     <option value="">-- pilih kamar --</option>
     <?php foreach ($kos as $k): ?>
-      <option value="<?= $k['id_kos'] ?>" <?= $d['id_kos'] == $k['id_kos'] ? 'selected' : '' ?>>
-        <?= $h->e($k['nomor_kamar']) ?> (<?= $h->e($k['status_kamar']) ?>)
-      </option>
+        <option
+            value="<?= $k['id_kos'] ?>"
+            <?= $d['id_kos'] == $k['id_kos'] ? 'selected' : '' ?>
+            <?= $k['status_kamar'] == 'terisi' ? 'disabled' : '' ?>
+            >
+            <?= $h->e($k['nomor_kamar']) ?>
+            (<?= $h->e($k['status_kamar']) ?>)
+        </option>
     <?php endforeach; ?>
   </select>
 

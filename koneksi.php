@@ -58,22 +58,41 @@ abstract class Model {
         return $st->fetch();
     }
 
-    public function simpan(array $data, $id = '') {
-        $nilai = [];
-        foreach ($this->kolom as $k) {
-            $nilai[] = $data[$k] ?? null;
-        }
+public function simpan(array $data, $id = '') {
+    $nilai = [];
 
-        if ($id === '') {
-            $tanda = implode(',', array_fill(0, count($this->kolom), '?'));
-            $sql = "INSERT INTO {$this->tabel} (" . implode(',', $this->kolom) . ") VALUES ($tanda)";
-        } else {
-            $set = implode('=?, ', $this->kolom) . '=?';
-            $sql = "UPDATE {$this->tabel} SET $set WHERE {$this->kunci} = ?";
-            $nilai[] = $id;
-        }
-        $this->db->prepare($sql)->execute($nilai);
+    foreach ($this->kolom as $k) {
+        $nilai[] = $data[$k] ?? null;
     }
+
+    if ($id === '') {
+        $tanda = implode(',', array_fill(0, count($this->kolom), '?'));
+        $sql = "INSERT INTO {$this->tabel} (" . implode(',', $this->kolom) . ") VALUES ($tanda)";
+    } else {
+        $set = implode('=?, ', $this->kolom) . '=?';
+        $sql = "UPDATE {$this->tabel} SET $set WHERE {$this->kunci} = ?";
+        $nilai[] = $id;
+    }
+
+    $this->db->prepare($sql)->execute($nilai);
+
+    // Mengubah status kamar setelah penyewa ditambahkan
+    if ($id === '' && $this->tabel === 'sewa_kos') {
+            $posisi = array_search('id_kos', $this->kolom, true);
+
+        if ($posisi !== false && !empty($nilai[$posisi])) {
+            $id_kos = $nilai[$posisi];
+
+            $stmt = $this->db->prepare("
+                UPDATE kos
+                SET status_kamar = 'terisi'
+                WHERE id_kos = ?
+            ");
+
+            $stmt->execute([$id_kos]);
+        }
+    }
+}
 
     public function hapus($id) {
         try {
